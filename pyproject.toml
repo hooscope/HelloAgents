@@ -48,7 +48,7 @@ rag = [
     "transformers>=4.20.0",      # Transformer模型
     "torch>=1.12.0",             # PyTorch
     "sentence-transformers>=2.2.0",  # 句子嵌入
-    "markitdown>=0.0.1",         # 文档转换
+    "markitdown[pdf]>=0.0.1",    # 文档和PDF转换
     "pypdf>=3.9.0",              # PDF处理
     "pdfminer.six>=20221105",    # PDF解析备选
 ]

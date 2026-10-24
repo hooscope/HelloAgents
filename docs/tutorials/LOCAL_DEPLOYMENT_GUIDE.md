@@ -32,8 +32,10 @@ ollama run codellama:7b
 # 方式1：使用专用环境变量
 OLLAMA_API_KEY=ollama
 OLLAMA_HOST=http://localhost:11434/v1
+LLM_PROVIDER=ollama
 
 # 方式2：使用统一配置
+LLM_PROVIDER=ollama
 LLM_MODEL_ID=llama3.2
 LLM_API_KEY=ollama
 LLM_BASE_URL=http://localhost:11434/v1
@@ -42,10 +44,16 @@ LLM_BASE_URL=http://localhost:11434/v1
 ```python
 from hello_agents import HelloAgentsLLM, SimpleAgent
 
-# 自动检测为ollama
+# 使用OLLAMA配置；LLM_PROVIDER也可显式指定提供商
 llm = HelloAgentsLLM()
 agent = SimpleAgent("Llama助手", llm)
 response = agent.run("你好！")
+```
+
+在仓库根目录配置好 `.env` 并安装项目后，也可以直接运行最小示例：
+
+```bash
+python -m examples.ollama_quickstart
 ```
 
 ### 2. vLLM 部署

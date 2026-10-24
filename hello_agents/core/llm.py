@@ -1,7 +1,7 @@
 """HelloAgents统一LLM接口 - 基于OpenAI原生API"""
 
 import os
-from typing import Literal, Optional, Iterator
+from typing import Literal, Optional, Iterator, get_args
 from openai import OpenAI
 
 from .exceptions import HelloAgentsException
@@ -64,9 +64,14 @@ class HelloAgentsLLM:
         self.timeout = timeout or int(os.getenv("LLM_TIMEOUT", "60"))
         self.kwargs = kwargs
 
-        # 自动检测provider或使用指定的provider
-        requested_provider = (provider or "").lower() if provider else None
-        self.provider = provider or self._auto_detect_provider(api_key, base_url)
+        # 参数和LLM_PROVIDER环境变量优先于自动检测，便于显式选择本地服务。
+        requested_provider = (provider or os.getenv("LLM_PROVIDER") or "").lower() or None
+        if requested_provider and requested_provider not in get_args(SUPPORTED_PROVIDERS):
+            supported = ", ".join(get_args(SUPPORTED_PROVIDERS))
+            raise HelloAgentsException(
+                f"不支持的LLM提供商: {requested_provider}。支持的提供商: {supported}"
+            )
+        self.provider = requested_provider or self._auto_detect_provider(api_key, base_url)
 
         if requested_provider == "custom":
             self.provider = "custom"

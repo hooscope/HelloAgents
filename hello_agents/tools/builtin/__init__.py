@@ -1,45 +1,38 @@
-"""内置工具模块
+"""内置工具集合。
 
-HelloAgents框架的内置工具集合，包括：
-- SearchTool: 网页搜索工具
-- CalculatorTool: 数学计算工具
-- MemoryTool: 记忆工具
-- RAGTool: 检索增强生成工具
-- NoteTool: 结构化笔记工具（第9章）
-- TerminalTool: 命令行工具（第9章）
-- MCPTool: MCP 协议工具（第10章 - 基于 mcp v1.15.0）
-- A2ATool: A2A 协议工具（第10章 - 基于 python-a2a v0.5.10）
-- ANPTool: ANP 协议工具（第10章 - 基于 agent-connect v0.3.7）
-- BFCLEvaluationTool: BFCL评估工具（第12章）
-- GAIAEvaluationTool: GAIA评估工具（第12章）
-- LLMJudgeTool: LLM Judge评估工具（第12章）
-- WinRateTool: Win Rate评估工具（第12章）
+通过延迟导入避免基础 Agent 加载未安装的可选功能依赖。
 """
 
-from .search_tool import SearchTool
-from .calculator import CalculatorTool
-from .memory_tool import MemoryTool
-from .rag_tool import RAGTool
-from .note_tool import NoteTool
-from .terminal_tool import TerminalTool
-from .protocol_tools import MCPTool, A2ATool, ANPTool
-from .bfcl_evaluation_tool import BFCLEvaluationTool
-from .gaia_evaluation_tool import GAIAEvaluationTool
-from .llm_judge_tool import LLMJudgeTool
-from .win_rate_tool import WinRateTool
+from importlib import import_module
 
-__all__ = [
-    "SearchTool",
-    "CalculatorTool",
-    "MemoryTool",
-    "RAGTool",
-    "NoteTool",
-    "TerminalTool",
-    "MCPTool",
-    "A2ATool",
-    "ANPTool",
-    "BFCLEvaluationTool",
-    "GAIAEvaluationTool",
-    "LLMJudgeTool",
-    "WinRateTool",
-]
+_EXPORTS = {
+    "SearchTool": ".search_tool",
+    "CalculatorTool": ".calculator",
+    "MemoryTool": ".memory_tool",
+    "RAGTool": ".rag_tool",
+    "NoteTool": ".note_tool",
+    "TerminalTool": ".terminal_tool",
+    "MCPTool": ".protocol_tools",
+    "A2ATool": ".protocol_tools",
+    "ANPTool": ".protocol_tools",
+    "BFCLEvaluationTool": ".bfcl_evaluation_tool",
+    "GAIAEvaluationTool": ".gaia_evaluation_tool",
+    "LLMJudgeTool": ".llm_judge_tool",
+    "WinRateTool": ".win_rate_tool",
+}
+
+__all__ = list(_EXPORTS)
+
+
+def __getattr__(name: str):
+    module_name = _EXPORTS.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    value = getattr(import_module(module_name, __name__), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__():
+    return sorted(set(globals()) | set(__all__))

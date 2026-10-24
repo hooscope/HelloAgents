@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 
 # 加载环境变量
 load_dotenv()
+os.environ.setdefault("EMBED_MODEL_TYPE", "local")
 
 from hello_agents import SimpleAgent, HelloAgentsLLM, ToolRegistry
 from hello_agents.tools import MemoryTool, RAGTool
@@ -178,8 +179,7 @@ def demo_combined_memory_and_rag():
 
     # 创建RAG工具
     rag_tool = RAGTool(
-        knowledge_base_path="./combo_knowledge_base",
-        embedding_model="local"  # 使用本地嵌入，稳定可靠
+        knowledge_base_path="./combo_knowledge_base"
     )
 
     # 创建工具注册表并注册两个工具
@@ -415,7 +415,7 @@ def demo_tool_features():
 
     # 创建工具实例
     memory_tool = MemoryTool(user_id="feature_test")
-    rag_tool = RAGTool(knowledge_base_path="./feature_test_kb", embedding_model="local")
+    rag_tool = RAGTool(knowledge_base_path="./feature_test_kb")
 
     print("🧠 MemoryTool 完整操作演示:")
 
@@ -443,10 +443,8 @@ def demo_tool_features():
         ("添加文本1", {"action": "add_text", "text": "机器学习是AI的重要分支", "document_id": "ml_intro"}),
         ("添加文本2", {"action": "add_text", "text": "深度学习使用神经网络", "document_id": "dl_intro"}),
         ("搜索知识", {"action": "search", "query": "机器学习", "limit": 2}),
-        ("获取上下文", {"action": "get_context", "query": "深度学习", "limit": 2}),
-        ("获取统计", {"action": "stats"}),
-        ("更新文档", {"action": "update_document", "document_id": "ml_intro", "text": "机器学习是人工智能的核心分支"}),
-        ("删除文档", {"action": "remove_document", "document_id": "dl_intro"})
+        ("智能问答", {"action": "ask", "question": "深度学习和机器学习是什么关系？"}),
+        ("获取统计", {"action": "stats"})
     ]
 
     for desc, params in rag_actions:
@@ -488,7 +486,7 @@ def demo_advanced_features():
     print(f"    整合结果: {result}")
 
     print("\n🔍 RAG系统高级功能:")
-    rag_tool = RAGTool(knowledge_base_path="./advanced_kb", embedding_model="local")
+    rag_tool = RAGTool(knowledge_base_path="./advanced_kb")
 
     # 演示批量添加和智能搜索
     print("\n  1. 批量知识添加:")
@@ -541,7 +539,6 @@ def demo_enhanced_pdf_and_local_embedding():
     # 创建RAG工具
     rag_tool = RAGTool(
         knowledge_base_path="./pdf_demo_kb",
-        embedding_model="local",
         rag_namespace="pdf_test"
     )
     
@@ -551,10 +548,15 @@ def demo_enhanced_pdf_and_local_embedding():
     
     # 检查是否有PDF文件可以测试
     pdf_files = []
-    test_files = ["Happy-LLM-0727.pdf"]
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    test_files = [
+        "Happy-LLM-0727.pdf",
+        "happy-llm-v1.0.1.pdf",
+    ]
     for pdf_file in test_files:
-        if os.path.exists(pdf_file):
-            pdf_files.append(pdf_file)
+        pdf_path = os.path.join(project_root, pdf_file)
+        if os.path.exists(pdf_path):
+            pdf_files.append(pdf_path)
     
     if pdf_files:
         print(f"\n📄 测试PDF文档处理...")
@@ -652,7 +654,7 @@ def demo_real_world_scenario():
 
     # 创建完整的学习助手系统
     memory_tool = MemoryTool(user_id="student_001")
-    rag_tool = RAGTool(knowledge_base_path="./learning_assistant_kb", embedding_model="local")
+    rag_tool = RAGTool(knowledge_base_path="./learning_assistant_kb")
 
     # 注册工具
     tool_registry = ToolRegistry()

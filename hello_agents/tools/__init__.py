@@ -1,71 +1,52 @@
-"""工具系统"""
+"""工具系统。
 
-from .base import Tool, ToolParameter
-from .registry import ToolRegistry, global_registry
+可选功能（如协议、评测和强化学习）的依赖仅在其对应工具被使用时导入。
+"""
 
-# 内置工具
-from .builtin.search_tool import SearchTool
-from .builtin.calculator import CalculatorTool
-from .builtin.memory_tool import MemoryTool
-from .builtin.rag_tool import RAGTool
-from .builtin.note_tool import NoteTool
-from .builtin.terminal_tool import TerminalTool
+from importlib import import_module
 
-# 协议工具
-from .builtin.protocol_tools import MCPTool, A2ATool, ANPTool
+_EXPORTS = {
+    "Tool": ".base",
+    "ToolParameter": ".base",
+    "ToolRegistry": ".registry",
+    "global_registry": ".registry",
+    "SearchTool": ".builtin.search_tool",
+    "CalculatorTool": ".builtin.calculator",
+    "MemoryTool": ".builtin.memory_tool",
+    "RAGTool": ".builtin.rag_tool",
+    "NoteTool": ".builtin.note_tool",
+    "TerminalTool": ".builtin.terminal_tool",
+    "MCPTool": ".builtin.protocol_tools",
+    "A2ATool": ".builtin.protocol_tools",
+    "ANPTool": ".builtin.protocol_tools",
+    "BFCLEvaluationTool": ".builtin.bfcl_evaluation_tool",
+    "GAIAEvaluationTool": ".builtin.gaia_evaluation_tool",
+    "LLMJudgeTool": ".builtin.llm_judge_tool",
+    "WinRateTool": ".builtin.win_rate_tool",
+    "RLTrainingTool": ".builtin.rl_training_tool",
+    "ToolChain": ".chain",
+    "ToolChainManager": ".chain",
+    "create_research_chain": ".chain",
+    "create_simple_chain": ".chain",
+    "AsyncToolExecutor": ".async_executor",
+    "run_parallel_tools": ".async_executor",
+    "run_batch_tool": ".async_executor",
+    "run_parallel_tools_sync": ".async_executor",
+    "run_batch_tool_sync": ".async_executor",
+}
 
-# 评估工具（第12章）
-from .builtin.bfcl_evaluation_tool import BFCLEvaluationTool
-from .builtin.gaia_evaluation_tool import GAIAEvaluationTool
-from .builtin.llm_judge_tool import LLMJudgeTool
-from .builtin.win_rate_tool import WinRateTool
+__all__ = list(_EXPORTS)
 
-# RL训练工具（第11章）
-from .builtin.rl_training_tool import RLTrainingTool
 
-# 高级功能
-from .chain import ToolChain, ToolChainManager, create_research_chain, create_simple_chain
-from .async_executor import AsyncToolExecutor, run_parallel_tools, run_batch_tool, run_parallel_tools_sync, run_batch_tool_sync
+def __getattr__(name: str):
+    module_name = _EXPORTS.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-__all__ = [
-    # 基础工具系统
-    "Tool",
-    "ToolParameter",
-    "ToolRegistry",
-    "global_registry",
+    value = getattr(import_module(module_name, __name__), name)
+    globals()[name] = value
+    return value
 
-    # 内置工具
-    "SearchTool",
-    "CalculatorTool",
-    "MemoryTool",
-    "RAGTool",
-    "NoteTool",
-    "TerminalTool",
 
-    # 协议工具
-    "MCPTool",
-    "A2ATool",
-    "ANPTool",
-
-    # 评估工具
-    "BFCLEvaluationTool",
-    "GAIAEvaluationTool",
-    "LLMJudgeTool",
-    "WinRateTool",
-
-    # RL训练工具
-    "RLTrainingTool",
-
-    # 工具链功能
-    "ToolChain",
-    "ToolChainManager",
-    "create_research_chain",
-    "create_simple_chain",
-
-    # 异步执行功能
-    "AsyncToolExecutor",
-    "run_parallel_tools",
-    "run_batch_tool",
-    "run_parallel_tools_sync",
-    "run_batch_tool_sync",
-]
+def __dir__():
+    return sorted(set(globals()) | set(__all__))
